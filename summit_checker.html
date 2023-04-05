@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summit Score Checker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #333;
+            color: #eee;
+        }
+        .container {
+            display: flex;
+            margin-top: 50px;
+        }
+        #datepicker {
+            margin-right: 20px;
+        }
+        #result {
+            white-space: pre-wrap;
+        }
+        a { color: white;}
+
+    </style>
+<script>
+    $(function() {
+        $("#datepicker").datepicker({
+            beforeShowDay: function(date) {
+                // Only allow Wednesdays to be selectable
+                return [(date.getDay() === 3), ''];
+            },
+            onSelect: function(dateText, inst) {
+                const date = new Date(dateText);
+                const timezoneOffset = date.getTimezoneOffset() * 60 * 1000; // Get the timezone offset in milliseconds
+                date.setHours(4, 0, 0, 0); // Set the time to 4:00:00 AM
+                date.setTime(date.getTime() - timezoneOffset); // Subtract the timezone offset to convert to UTC
+
+                const epochTime = date.getTime() / 1000; // Convert milliseconds to seconds
+                $('#epoch-time').text(epochTime);
+                fetchSummitScore(epochTime);
+            }
+        });
+    });
+
+    function fetchSummitScore(summitTime) {
+        const corsProxy = 'https://corsproxy.io/?';
+        const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/a9736d06-7e5d-42e2-a770-8bee583c9716')}`;
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                $('#result').text(JSON.stringify(data, null, 2));
+            },
+            error: function(err) {
+                $('#result').text('Error fetching data: ' + JSON.stringify(err, null, 2));
+            }
+        });
+    }
+</script>
+</head>
+<body>
+    <div style="display: flex; align-items: center;">
+        <img src="https://www.thecrew-hub.com/assets/tc2-logo-OLD-NEW.png" alt="The Crew 2 Logo" width="100" style="margin-right: 10px;">
+        <h1>Summit Score Checker</h1>
+    </div>
+    <div>
+        <label for="profile-id">Profile ID:</label>
+        <input type="text" id="profile-id" value="your profile ID" style="margin-bottom: 20px;">
+    </div>
+    <div><p>on <a target="_blank" href="https://www.thecrew-hub.com/summit/calendar">the Hub</a>, press F12 for developer tools, go to the network tab, and enter "profiles?user" in the filter box to find your profile ID.</p></div>
+    <div class="container">
+        <div>
+            <p>Select the day the Summit started:</p>
+            <div id="datepicker"></div>
+            <p>Epoch time: <span id="epoch-time"></span></p>
+        </div>
+        <div>
+            <pre id="result"></pre>
+        </div>
+    </div>
+</body>
+</html>
