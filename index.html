@@ -59,15 +59,16 @@
 
     function fetchSummitScore(summitTime) {
 
+    const profileId = document.getElementById("profile-id").value;
     const corsProxy = 'https://corsproxy.io/?';
-    const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/')}`;
+    const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/')}${profileId}`;
 
     $.ajax({
         url: url,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            jsonview.destroy(tree);
+            document.getElementById('result').innerHTML = '';
             const tree = jsonview.create(JSON.stringify(data, null, 2));
             jsonview.render(tree, document.querySelector('#result'));
             jsonview.expand(tree);
