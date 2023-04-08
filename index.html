@@ -60,13 +60,14 @@
     function fetchSummitScore(summitTime) {
 
     const corsProxy = 'https://corsproxy.io/?';
-    const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/a9736d06-7e5d-42e2-a770-8bee583c9716')}`;
+    const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/')}`;
 
     $.ajax({
         url: url,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
+            jsonview.destroy(tree);
             const tree = jsonview.create(JSON.stringify(data, null, 2));
             jsonview.render(tree, document.querySelector('#result'));
             jsonview.expand(tree);
