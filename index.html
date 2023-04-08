@@ -38,6 +38,18 @@
 
     </style>
 <script>
+    function getURLParameter(name) {
+        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        const results = regex.exec(window.location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileId = getURLParameter('id');
+        if (profileId) {
+            document.getElementById('profile-id').value = profileId;
+        }
+    });
+
     $(function() {
         $("#datepicker").datepicker({
             beforeShowDay: function(date) {
