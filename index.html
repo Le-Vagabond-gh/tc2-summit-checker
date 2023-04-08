@@ -6,7 +6,8 @@
     <title>Summit Score Checker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/gh/pgrabovets/json-view/dist/jsonview.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,6 +16,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            background-color: #333;
+            color: #eee;
+        }
+        .json-container, .json-container .json-key {
+            font-family: Arial, sans-serif;
             background-color: #333;
             color: #eee;
         }
@@ -52,20 +58,25 @@
     });
 
     function fetchSummitScore(summitTime) {
-        const corsProxy = 'https://corsproxy.io/?';
-        const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/a9736d06-7e5d-42e2-a770-8bee583c9716')}`;
-        $.ajax({
-            url: url,
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                $('#result').text(JSON.stringify(data, null, 2));
-            },
-            error: function(err) {
-                $('#result').text('Error fetching data: ' + JSON.stringify(err, null, 2));
-            }
-        });
-    }
+
+    const corsProxy = 'https://corsproxy.io/?';
+    const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/pc/profile/a9736d06-7e5d-42e2-a770-8bee583c9716')}`;
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            const tree = jsonview.create(JSON.stringify(data, null, 2));
+            jsonview.render(tree, document.querySelector('#result'));
+            jsonview.expand(tree);
+        },
+        error: function(err) {
+            document.querySelector('#result').textContent = 'Error fetching data: ' + JSON.stringify(err, null, 2);
+        }
+    });
+}
+
 </script>
 </head>
 <body>
@@ -75,7 +86,7 @@
     </div>
     <div>
         <label for="profile-id">Profile ID:</label>
-        <input type="text" id="profile-id" value="your profile ID" style="margin-bottom: 20px;">
+        <input type="text" id="profile-id" value="<your profile ID>" style="margin-bottom: 20px;">
     </div>
     <div><p>on <a target="_blank" href="https://www.thecrew-hub.com/summit/calendar">the Hub</a>, press F12 for developer tools, go to the network tab, and enter "profiles?user" in the filter box to find your profile ID.</p></div>
     <div class="container">
