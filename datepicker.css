@@ -1,0 +1,65 @@
+/* Datepicker container */
+.ui-datepicker {
+    background-color: #333;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 4px;
+}
+/* Datepicker header */
+.ui-datepicker-header {
+    background-color: #444;
+    border: none;
+    padding: 5px 0;
+    border-radius: 4px;
+}
+/* Month and year text */
+.ui-datepicker-title {
+    color: #eee;
+}
+/* Navigation buttons */
+.ui-datepicker-prev, .ui-datepicker-next {
+    cursor: pointer;
+    color: #eee;
+}
+/* Table */
+.ui-datepicker-calendar {
+    border-collapse: collapse;
+    width: 100%;
+}
+/* Table header */
+.ui-datepicker th {
+    color: #eee;
+    padding: 5px;
+}
+
+.ui-datepicker .ui-datepicker-title {
+    color: #333;
+}
+
+/* Table cells */
+.ui-datepicker td {
+    padding: 3px;
+}
+/* Table days */
+.ui-datepicker-calendar a {
+    color: #eee;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    padding: 2px;
+}
+/* Selected day */
+.ui-datepicker-calendar .ui-state-active {
+    background-color: #666;
+    border-radius: 4px;
+}
+/* Hovered day */
+.ui-datepicker-calendar a:hover {
+    background-color: #555;
+    border-radius: 4px;
+}
+/* Unselectable days */
+.ui-datepicker-unselectable .ui-state-default {
+    color: #888;
+}
