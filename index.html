@@ -50,6 +50,27 @@
         }
     });
 
+    function updateLink() {
+            const profileIdInput = document.getElementById('profile-id');
+            const linkContainer = document.getElementById('link-container');
+
+            profileIdInput.addEventListener('input', function () {
+                let profileId = profileIdInput.value;
+                let link = document.getElementById('generated-link');
+
+                if (!link) {
+                    link = document.createElement('a');
+                    link.id = 'generated-link';
+                    linkContainer.appendChild(link);
+                }
+
+                link.href = `https://le-vagabond-gh.github.io/tc2-summit-checker/?id=${profileId}`;
+                link.textContent = 'permalink';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', updateLink);
+
     $(function() {
         $("#datepicker").datepicker({
             beforeShowDay: function(date) {
@@ -102,6 +123,7 @@
         <label for="profile-id">Profile ID:</label>
         <input type="text" id="profile-id" value="<your profile ID>" style="margin-bottom: 20px;">
     </div>
+    <div id="link-container"></div>
     <div><p>on <a target="_blank" href="https://www.thecrew-hub.com/summit/calendar">the Hub</a>, press F12 for developer tools, go to the network tab, and enter "profiles?user" in the filter box to find your profile ID.</p></div>
     <div class="container">
         <div>
