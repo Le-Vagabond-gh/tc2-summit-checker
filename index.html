@@ -47,7 +47,7 @@
     }
     document.addEventListener('DOMContentLoaded', function() {
         const profileId = getURLParameter('id');
-        const platform = getURLParameter('platform');
+        const platform = getURLParameter('platform')  || 'PC';
         if (profileId) {
             document.getElementById('profile-id').value = profileId;
             document.getElementById('platform').value = platform;
