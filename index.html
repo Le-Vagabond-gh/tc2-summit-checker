@@ -83,6 +83,7 @@
 
     $(function() {
         $("#datepicker").datepicker({
+            firstDay: 1, // Set Monday as the first day of the week
             beforeShowDay: function(date) {
                 // Only allow Wednesdays to be selectable
                 return [(date.getDay() === 3), ''];
