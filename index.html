@@ -54,6 +54,22 @@
         }
     });
 
+    function traverseAndCollapse(node, targetKey) {
+        if (node.key === targetKey) {
+            jsonview.collapse(node);
+            return true;
+        }
+
+        for (const child of node.children) {
+            const found = traverseAndCollapse(child, targetKey);
+            if (found) {
+                return true;
+            }
+        }
+
+    return false;
+}
+
     function updateLink() {
     const profileIdInput = document.getElementById('profile-id');
     const platformInput = document.getElementById('platform');
@@ -114,9 +130,17 @@
         dataType: 'json',
         success: function(data) {
             document.getElementById('result').innerHTML = '';
+            data.tier_entries.forEach(entry => {
+        if (entry.rank !== 4294967295) {
+            entry.rank += ` out of ${data.total_players} players (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
+        }
+    });
             const tree = jsonview.create(JSON.stringify(data, null, 2));
             jsonview.render(tree, document.querySelector('#result'));
             jsonview.expand(tree);
+
+            // Traverse the tree and collapse the 'activities' node
+            traverseAndCollapse(tree, 'activities');
         },
         error: function(err) {
             document.querySelector('#result').textContent = 'Error fetching data: ' + JSON.stringify(err, null, 2);
