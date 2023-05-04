@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summit Score Checker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="datepicker.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/pgrabovets/json-view/dist/jsonview.js"></script>
     <style>
         body {
@@ -20,142 +22,170 @@
             background-color: #333;
             color: #eee;
         }
-        .json-container, .json-container .json-key {
+
+        .json-container,
+        .json-container .json-key {
             font-family: Arial, sans-serif;
             background-color: #333;
             color: #eee;
         }
+
         .container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
         }
+
         #datepicker {
             margin-right: 20px;
         }
+
         #result {
             white-space: pre-wrap;
         }
-        a { color: white;}
 
+        a {
+            color: white;
+        }
     </style>
-<script>
-    function getURLParameter(name) {
-        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        const results = regex.exec(window.location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        const profileId = getURLParameter('id');
-        const platform = getURLParameter('platform') || 'pc';
-        if (profileId) {
-            document.getElementById('profile-id').value = profileId;
-            document.getElementById('platform').value = platform;
+    <script>
+        function getURLParameter(name) {
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(window.location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
-    });
-
-    function traverseAndCollapse(node, targetKey) {
-        if (node.key === targetKey) {
-            jsonview.collapse(node);
-            return true;
-        }
-
-        for (const child of node.children) {
-            const found = traverseAndCollapse(child, targetKey);
-            if (found) {
-                return true;
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileId = getURLParameter('id');
+            const platform = getURLParameter('platform') || 'pc';
+            if (profileId) {
+                document.getElementById('profile-id').value = profileId;
+                document.getElementById('platform').value = platform;
             }
+        });
+
+        function updateLink() {
+            const profileIdInput = document.getElementById('profile-id');
+            const platformInput = document.getElementById('platform');
+            const linkContainer = document.getElementById('link-container');
+
+            function updatePermalink() {
+                let profileId = profileIdInput.value;
+                let platform = platformInput.value;
+                let link = document.getElementById('generated-link');
+
+                if (!link) {
+                    link = document.createElement('a');
+                    link.id = 'generated-link';
+                    linkContainer.appendChild(link);
+                }
+
+                const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+                link.href = `${baseUrl}?id=${profileId}&platform=${platform}`;
+                link.textContent = 'permalink';
+            }
+
+            profileIdInput.addEventListener('input', updatePermalink);
+            platformInput.addEventListener('change', updatePermalink);
         }
-
-    return false;
-}
-
-    function updateLink() {
-    const profileIdInput = document.getElementById('profile-id');
-    const platformInput = document.getElementById('platform');
-    const linkContainer = document.getElementById('link-container');
-
-    function updatePermalink() {
-        let profileId = profileIdInput.value;
-        let platform = platformInput.value;
-        let link = document.getElementById('generated-link');
-
-        if (!link) {
-            link = document.createElement('a');
-            link.id = 'generated-link';
-            linkContainer.appendChild(link);
-        }
-
-        const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-        link.href = `${baseUrl}?id=${profileId}&platform=${platform}`;
-        link.textContent = 'permalink';
-    }
-
-    profileIdInput.addEventListener('input', updatePermalink);
-    platformInput.addEventListener('change', updatePermalink);
-}
 
         document.addEventListener('DOMContentLoaded', updateLink);
 
-    $(function() {
-        $("#datepicker").datepicker({
-            firstDay: 1, // Set Monday as the first day of the week
-            beforeShowDay: function(date) {
-                // Only allow Wednesdays to be selectable
-                return [(date.getDay() === 3), ''];
-            },
-            onSelect: function(dateText, inst) {
-                const date = new Date(dateText);
-                const timezoneOffset = date.getTimezoneOffset() * 60 * 1000; // Get the timezone offset in milliseconds
-                date.setHours(4, 0, 0, 0); // Set the time to 4:00:00 AM
-                date.setTime(date.getTime() - timezoneOffset); // Subtract the timezone offset to convert to UTC
+        $(function () {
+            $("#datepicker").datepicker({
+                firstDay: 1, // Set Monday as the first day of the week
+                beforeShowDay: function (date) {
+                    // Only allow Wednesdays to be selectable
+                    return [(date.getDay() === 3), ''];
+                },
+                onSelect: function (dateText, inst) {
+                    const date = new Date(dateText);
+                    const timezoneOffset = date.getTimezoneOffset() * 60 * 1000; // Get the timezone offset in milliseconds
+                    date.setHours(4, 0, 0, 0); // Set the time to 4:00:00 AM
+                    date.setTime(date.getTime() - timezoneOffset); // Subtract the timezone offset to convert to UTC
 
-                const epochTime = date.getTime() / 1000; // Convert milliseconds to seconds
-                $('#epoch-time').text(epochTime);
-                fetchSummitScore(epochTime);
-            }
+                    const epochTime = date.getTime() / 1000; // Convert milliseconds to seconds
+                    $('#epoch-time').text(epochTime);
+                    fetchSummitScore(epochTime);
+                }
+            });
         });
-    });
 
-    function fetchSummitScore(summitTime) {
+        function fetchSummitScore(summitTime) {
 
-    const profileId = document.getElementById("profile-id").value;
-    const corsProxy = 'https://corsproxy.io/?';
-    const platform = document.getElementById("platform").value;
-    const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/')}${platform}${encodeURIComponent('/profile/')}${profileId}`;
+            const profileId = document.getElementById("profile-id").value;
+            const corsProxy = 'https://corsproxy.io/?';
+            const platform = document.getElementById("platform").value;
+            const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/')}${platform}${encodeURIComponent('/profile/')}${profileId}`;
 
-    $.ajax({
-        url: url,
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            document.getElementById('result').innerHTML = '';
-            data.tier_entries.forEach(entry => {
-        if (entry.rank !== 4294967295) {
-            entry.rank += ` out of ${data.total_players} players (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // Move the "activities" key after the "tier_entries" key
+                    const { tier_entries, activities, ...rest } = data;
+                    data = { ...rest, tier_entries, activities };
+
+                    // Add a "class" key to each tier entry and reverse their order
+                    const classMap = {
+                        0: 'bronze',
+                        1: 'silver',
+                        2: 'gold',
+                        3: 'platinum',
+                    };
+                    data.tier_entries.forEach((entry, index) => {
+                        const classKey = classMap[index];
+                        entry.class = classKey;
+                    });
+                    data.tier_entries.reverse();
+
+                    document.getElementById('result').innerHTML = '';
+
+                    function replaceValueWithInfinity(obj) {
+                        for (let key in obj) {
+                            if (typeof obj[key] === 'object') {
+                                replaceValueWithInfinity(obj[key]);
+                            } else if (obj[key] === 4294967295) {
+                                obj[key] = "∞";
+                            }
+                        }
+                    }
+
+                    replaceValueWithInfinity(data);
+
+                    data.tier_entries.forEach(entry => {
+                        if (entry.rank !== "∞") {
+                            if (entry.rank > data.total_players) {
+                                entry.rank = "∞";
+                            } else {
+                                entry.rank += ` out of ${data.total_players} (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
+                            }
+                        }
+                    });
+                    const tree = jsonview.create(JSON.stringify(data, null, 2));
+                    jsonview.render(tree, document.querySelector('#result'));
+                    jsonview.expand(tree);
+
+                },
+                error: function (err) {
+                    document.querySelector('#result').textContent = 'Error fetching data: ' + JSON.stringify(err, null, 2);
+                }
+            });
         }
-    });
-            const tree = jsonview.create(JSON.stringify(data, null, 2));
-            jsonview.render(tree, document.querySelector('#result'));
-            jsonview.expand(tree);
 
-            // Traverse the tree and collapse the 'activities' node
-            traverseAndCollapse(tree, 'activities');
-        },
-        error: function(err) {
-            document.querySelector('#result').textContent = 'Error fetching data: ' + JSON.stringify(err, null, 2);
-        }
-    });
-}
-
-</script>
+    </script>
 </head>
+
 <body>
     <div style="display: flex; align-items: center;">
-        <img src="https://www.thecrew-hub.com/assets/tc2-logo-OLD-NEW.png" alt="The Crew 2 Logo" width="100" style="margin-right: 10px;">
+        <img src="https://www.thecrew-hub.com/assets/tc2-logo-OLD-NEW.png" alt="The Crew 2 Logo" width="100"
+            style="margin-right: 10px;">
         <h1>Summit Score Checker</h1>
     </div>
-    <div><p>on <a target="_blank" href="https://www.thecrew-hub.com/summit/calendar">the Hub</a>, press F12 for developer tools, go to the network tab, and enter "profiles?user" in the filter box to find your profile ID.</p></div>
+    <div>
+        <p>on <a target="_blank" href="https://www.thecrew-hub.com/summit/calendar">the Hub</a>, press F12 for developer
+            tools, go to the network tab, and enter "profiles?user" in the filter box to find your profile ID.</p>
+    </div>
     <div>
         <label for="profile-id">Profile ID:</label>
         <input type="text" id="profile-id" value="<your profile ID>" style="margin-bottom: 20px;">
@@ -163,7 +193,7 @@
             <option value="pc">PC</option>
             <option value="ps4">PS4</option>
             <option value="x1">Xbox</option>
-        </select>            
+        </select>
     </div>
     <div id="link-container"></div>
     <div class="container">
@@ -177,4 +207,5 @@
         </div>
     </div>
 </body>
+
 </html>
