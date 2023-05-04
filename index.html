@@ -138,6 +138,17 @@
                         entry.class = classKey;
                     });
                     data.tier_entries.reverse();
+                    // Reverse the keys inside each object of the tier_entries array
+                    $.each(data.tier_entries, function (index, entry) {
+                        let reversedEntry = {};
+                        let keys = Object.keys(entry).reverse();
+
+                        $.each(keys, function (_, key) {
+                            reversedEntry[key] = entry[key];
+                        });
+
+                        data.tier_entries[index] = reversedEntry;
+                    });
 
                     document.getElementById('result').innerHTML = '';
 
