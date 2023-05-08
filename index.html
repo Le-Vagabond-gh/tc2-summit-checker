@@ -111,8 +111,24 @@
         });
 
         function addMedalImage(rawData) {
+
+            // Remove the parent div of the existing image element
+            const existingImage = document.querySelector('.medal-img');
+            if (existingImage) {
+                const parentLine = existingImage.closest('.line');
+                if (parentLine) {
+                    parentLine.remove();
+                }
+            }
+
             let rank = rawData.rank;
             let medalImgSrc;
+
+            // Return immediately if the rank is 0 (unranked)
+            if (rank === 0) {
+                return;
+            }
+
             if (rank < rawData.tier_entries[3].rank) {
                 medalImgSrc = 'https://www.thecrew-hub.com/assets/icons/summit/Platinum_Medal_Summit.png';
             } else if (rank < rawData.tier_entries[2].rank) {
@@ -124,12 +140,11 @@
             }
 
             if (medalImgSrc) {
-                const medalImg = $('<img>')
-                    .attr('src', medalImgSrc)
-                    .css({
-                        'margin-left': '30px',
-                        'width': '100px'
-                    });
+                const medalImg = document.createElement('img');
+                medalImg.src = medalImgSrc;
+                medalImg.style.marginLeft = '30px';
+                medalImg.style.width = '100px';
+                medalImg.classList.add('medal-img'); // Add a class to the image element
 
                 const rankElem = $('#result > div > div:nth-child(3) > div.json-number');
                 const medalLine = $('<div>').addClass('line').append(medalImg);
@@ -151,6 +166,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
+
                     const rawData = JSON.parse(JSON.stringify(data));
 
                     // Move the "activities" key after the "tier_entries" key
@@ -204,6 +220,7 @@
                             }
                         }
                     });
+
                     const tree = jsonview.create(JSON.stringify(data, null, 2));
                     jsonview.render(tree, document.querySelector('#result'));
                     jsonview.expand(tree);
