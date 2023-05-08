@@ -110,6 +110,35 @@
             });
         });
 
+        function addMedalImage(rawData) {
+            let rank = rawData.rank;
+            let medalImgSrc;
+            if (rank < rawData.tier_entries[3].rank) {
+                medalImgSrc = 'https://www.thecrew-hub.com/assets/icons/summit/Platinum_Medal_Summit.png';
+            } else if (rank < rawData.tier_entries[2].rank) {
+                medalImgSrc = 'https://www.thecrew-hub.com/assets/icons/summit/Gold_Medal_Summit.png';
+            } else if (rank < rawData.tier_entries[1].rank) {
+                medalImgSrc = 'https://www.thecrew-hub.com/assets/icons/summit/Silver_Medal_Summit.png';
+            } else {
+                medalImgSrc = 'https://www.thecrew-hub.com/assets/icons/summit/Gold_Medal_Summit.png';
+            }
+
+            if (medalImgSrc) {
+                const medalImg = $('<img>')
+                    .attr('src', medalImgSrc)
+                    .css({
+                        'margin-left': '30px',
+                        'width': '100px'
+                    });
+
+                const rankElem = $('#result > div > div:nth-child(3) > div.json-number');
+                const medalLine = $('<div>').addClass('line').append(medalImg);
+
+                rankElem.parent().after(medalLine);
+            }
+        }
+
+
         function fetchSummitScore(summitTime) {
 
             const profileId = document.getElementById("profile-id").value;
@@ -122,6 +151,8 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
+                    const rawData = JSON.parse(JSON.stringify(data));
+
                     // Move the "activities" key after the "tier_entries" key
                     const { tier_entries, activities, ...rest } = data;
                     data = { ...rest, tier_entries, activities };
@@ -176,6 +207,7 @@
                     const tree = jsonview.create(JSON.stringify(data, null, 2));
                     jsonview.render(tree, document.querySelector('#result'));
                     jsonview.expand(tree);
+                    addMedalImage(rawData);
 
                 },
                 error: function (err) {
