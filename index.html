@@ -47,6 +47,22 @@
         a {
             color: white;
         }
+
+        .shimmer {
+            color: rgb(255, 255, 255);
+            display: inline-block;
+            -webkit-mask: linear-gradient(-60deg, #ffffff 30%, rgba(255, 255, 255, 0.5), #ffffff 70%) right/300% 100%;
+            background-repeat: no-repeat;
+            animation: shimmer 5s infinite;
+            font-size: 50px;
+            max-width: 200px;
+        }
+
+        @keyframes shimmer {
+            100% {
+                -webkit-mask-position: left
+            }
+        }
     </style>
     <script>
         function getURLParameter(name) {
@@ -145,6 +161,7 @@
                 medalImg.style.marginLeft = '30px';
                 medalImg.style.width = '100px';
                 medalImg.classList.add('medal-img'); // Add a class to the image element
+                medalImg.classList.add('shimmer'); // Add a class to the image element
 
                 const rankElem = $('#result > div > div:nth-child(3) > div.json-number');
                 const medalLine = $('<div>').addClass('line').append(medalImg);
