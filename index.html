@@ -176,81 +176,91 @@
             const profileId = document.getElementById("profile-id").value;
             const corsProxy = 'https://corsproxy.io/?';
             const platform = document.getElementById("platform").value;
-            const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${summitTime}${encodeURIComponent('/score/')}${platform}${encodeURIComponent('/profile/')}${profileId}`;
+            const endTime = summitTime + 64800;
 
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
+            function requestSummitScore(currentTime) {
+                const url = `${corsProxy}${encodeURIComponent('https://api.thecrew-hub.com/v1/summit/')}${currentTime}${encodeURIComponent('/score/')}${platform}${encodeURIComponent('/profile/')}${profileId}`;
 
-                    const rawData = JSON.parse(JSON.stringify(data));
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
 
-                    data.points = data.points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                        const rawData = JSON.parse(JSON.stringify(data));
 
-                    // Move the "activities" key after the "tier_entries" key
-                    const { tier_entries, activities, ...rest } = data;
-                    data = { ...rest, tier_entries, activities };
+                        data.points = data.points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-                    // Add a "class" key to each tier entry and reverse their order
-                    const classMap = {
-                        0: 'bronze',
-                        1: 'silver',
-                        2: 'gold',
-                        3: 'platinum',
-                    };
-                    data.tier_entries.forEach((entry, index) => {
-                        const classKey = classMap[index];
-                        entry.class = classKey;
-                    });
-                    data.tier_entries.reverse();
-                    // Reverse the keys inside each object of the tier_entries array
-                    $.each(data.tier_entries, function (index, entry) {
-                        let reversedEntry = {};
-                        let keys = Object.keys(entry).reverse();
+                        // Move the "activities" key after the "tier_entries" key
+                        const { tier_entries, activities, ...rest } = data;
+                        data = { ...rest, tier_entries, activities };
 
-                        $.each(keys, function (_, key) {
-                            reversedEntry[key] = entry[key];
+                        // Add a "class" key to each tier entry and reverse their order
+                        const classMap = {
+                            0: 'bronze',
+                            1: 'silver',
+                            2: 'gold',
+                            3: 'platinum',
+                        };
+                        data.tier_entries.forEach((entry, index) => {
+                            const classKey = classMap[index];
+                            entry.class = classKey;
+                        });
+                        data.tier_entries.reverse();
+                        // Reverse the keys inside each object of the tier_entries array
+                        $.each(data.tier_entries, function (index, entry) {
+                            let reversedEntry = {};
+                            let keys = Object.keys(entry).reverse();
+
+                            $.each(keys, function (_, key) {
+                                reversedEntry[key] = entry[key];
+                            });
+
+                            data.tier_entries[index] = reversedEntry;
                         });
 
-                        data.tier_entries[index] = reversedEntry;
-                    });
+                        document.getElementById('result').innerHTML = '';
 
-                    document.getElementById('result').innerHTML = '';
-
-                    function replaceValueWithInfinity(obj) {
-                        for (let key in obj) {
-                            if (typeof obj[key] === 'object') {
-                                replaceValueWithInfinity(obj[key]);
-                            } else if (obj[key] === 4294967295) {
-                                obj[key] = "∞";
+                        function replaceValueWithInfinity(obj) {
+                            for (let key in obj) {
+                                if (typeof obj[key] === 'object') {
+                                    replaceValueWithInfinity(obj[key]);
+                                } else if (obj[key] === 4294967295) {
+                                    obj[key] = "∞";
+                                }
                             }
+                        }
+
+                        replaceValueWithInfinity(data);
+
+                        data.tier_entries.forEach(entry => {
+                            entry.points = entry.points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                            if (entry.rank !== "∞") {
+                                if (entry.rank > data.total_players) {
+                                    entry.rank = "∞";
+                                } else {
+                                    entry.rank += ` out of ${data.total_players} players (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
+                                }
+                            }
+                        });
+
+                        const tree = jsonview.create(JSON.stringify(data, null, 2));
+                        jsonview.render(tree, document.querySelector('#result'));
+                        jsonview.expand(tree);
+                        addMedalImage(rawData);
+
+                    },
+                    error: function (err) {
+                        if (currentTime < endTime) {
+                            requestSummitScore(currentTime + 1800);
+                        } else {
+                            document.querySelector('#result').textContent = 'No Summit data found for this day.';
                         }
                     }
+                });
+            }
 
-                    replaceValueWithInfinity(data);
-
-                    data.tier_entries.forEach(entry => {
-                        entry.points = entry.points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-                        if (entry.rank !== "∞") {
-                            if (entry.rank > data.total_players) {
-                                entry.rank = "∞";
-                            } else {
-                                entry.rank += ` out of ${data.total_players} players (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
-                            }
-                        }
-                    });
-
-                    const tree = jsonview.create(JSON.stringify(data, null, 2));
-                    jsonview.render(tree, document.querySelector('#result'));
-                    jsonview.expand(tree);
-                    addMedalImage(rawData);
-
-                },
-                error: function (err) {
-                    document.querySelector('#result').textContent = 'Error fetching data: ' + JSON.stringify(err, null, 2);
-                }
-            });
+            requestSummitScore(summitTime);
         }
 
     </script>
