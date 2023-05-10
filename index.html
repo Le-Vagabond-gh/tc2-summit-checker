@@ -172,6 +172,7 @@
 
 
         function fetchSummitScore(summitTime) {
+            document.getElementById('result').innerHTML = '';
 
             const profileId = document.getElementById("profile-id").value;
             const corsProxy = 'https://corsproxy.io/?';
@@ -186,6 +187,7 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function (data) {
+                        $('#epoch-time').text(currentTime + " !");
 
                         const rawData = JSON.parse(JSON.stringify(data));
 
@@ -218,8 +220,6 @@
 
                             data.tier_entries[index] = reversedEntry;
                         });
-
-                        document.getElementById('result').innerHTML = '';
 
                         function replaceValueWithInfinity(obj) {
                             for (let key in obj) {
