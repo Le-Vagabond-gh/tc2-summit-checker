@@ -187,7 +187,9 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                        $('#epoch-time').text(currentTime + " !");
+                        if (currentTime != summitTime) {
+                            $('#epoch-time').text(currentTime + " !");
+                        }
 
                         const rawData = JSON.parse(JSON.stringify(data));
 
