@@ -186,6 +186,8 @@
 
                     const rawData = JSON.parse(JSON.stringify(data));
 
+                    data.points = data.points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
                     // Move the "activities" key after the "tier_entries" key
                     const { tier_entries, activities, ...rest } = data;
                     data = { ...rest, tier_entries, activities };
@@ -229,11 +231,12 @@
                     replaceValueWithInfinity(data);
 
                     data.tier_entries.forEach(entry => {
+                        entry.points = entry.points.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
                         if (entry.rank !== "∞") {
                             if (entry.rank > data.total_players) {
                                 entry.rank = "∞";
                             } else {
-                                entry.rank += ` out of ${data.total_players} (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
+                                entry.rank += ` out of ${data.total_players} players (${((entry.rank / data.total_players) * 100).toFixed(2)}%)`;
                             }
                         }
                     });
